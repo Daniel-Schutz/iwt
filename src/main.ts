@@ -19,7 +19,10 @@ function rotationBetweenDirections(dir1: THREE.Vector3, dir2: THREE.Vector3): TH
 
 async function setupAuth() {
   const redirectUri = window.location.origin + window.location.pathname;
-  console.log("ssasa",import.meta.env.VITE_CLIENT_ID)
+  console.log("Iniciando autenticação");
+  console.log("Client ID:", import.meta.env.VITE_CLIENT_ID);
+  console.log("Redirect URI:", redirectUri);
+  
   authClient = new BrowserAuthorizationClient({
     authority: `https://ims.bentley.com`,
     clientId: import.meta.env.VITE_CLIENT_ID,
@@ -28,9 +31,12 @@ async function setupAuth() {
     responseType: "code",
   });
 
+  console.log("Verificando callback de login...");
   await authClient.handleSigninCallback();
 
+  console.log("Está autorizado?", authClient.isAuthorized);
   if (!authClient.isAuthorized) {
+    console.log("Não está autorizado, redirecionando para login...");
     await authClient.signInRedirect();
   }
 
@@ -42,6 +48,8 @@ async function main() {
 
   const iModelId = import.meta.env.VITE_IMODEL_ID;
   const accessToken = await authClient.getAccessToken();
+  console.log("Token obtido:", accessToken ? "Sim" : "Não");
+  
   const tilesetUrl = await getIModel3dTilesUrl(iModelId, accessToken);
 
   if (!tilesetUrl) {
